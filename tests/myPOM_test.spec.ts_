@@ -1,0 +1,14 @@
+import { test, expect } from "@playwright/test";
+import { MyFormPage } from "../pages/MyFormPage";
+
+test("User can submit registration form (POM)", async ({ page }) => {
+  const formPage = new MyFormPage(page);
+
+  await formPage.goto();
+
+  await formPage.fillForm();
+
+  await formPage.submit();
+
+  await expect(page.getByText(/Thank you for registering/)).toBeVisible();
+});

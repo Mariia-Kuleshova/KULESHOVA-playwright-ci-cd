@@ -1,0 +1,92 @@
+import { test, expect } from "@playwright/test";
+
+test.setTimeout(60000);
+
+test("Взаємодія з елементами форми та використання бібліотеки локаторів", async ({
+  page,
+}) => {
+  const locators = {
+    practiceFormsLink: page.locator('a[href="/forms"]'),
+    practiceFormLink: page.locator('a[href="/automation-practice-form"]'),
+
+    form: page.locator("form#userForm"),
+
+    firstNameInput: page.locator("#firstName"),
+    lastNameInput: page.locator("#lastName"),
+    userEmailInput: page.locator("#userEmail"),
+
+    genderRadioMale: page.locator('label[for="gender-radio-1"]'),
+    genderRadioFemale: page.locator('label[for="gender-radio-2"]'),
+    genderRadioOther: page.locator('label[for="gender-radio-3"]'),
+
+    userNumberInput: page.locator("#userNumber"),
+
+    dateOfBirthInput: page.locator("#dateOfBirthInput"),
+
+    subjectsInput: page.locator("#subjectsInput"),
+
+    hobbiesCheckboxSports: page.locator('label[for="hobbies-checkbox-1"]'),
+    hobbiesCheckboxReading: page.locator('label[for="hobbies-checkbox-2"]'),
+    hobbiesCheckboxMusic: page.locator('label[for="hobbies-checkbox-3"]'),
+
+    uploadPictureInput: page.locator("#uploadPicture"),
+
+    currentAddressTextarea: page.locator("#currentAddress"),
+
+    stateDropdownWrapper: page.locator("#state"),
+    stateDropdownInput: page.locator("#state input"),
+
+    cityDropdownWrapper: page.locator("#city"),
+    cityDropdownInput: page.locator("#city input"),
+
+    submitButton: page.locator("#submit"),
+  };
+
+  await page.goto("https://demoqa.com/");
+  await locators.practiceFormsLink.click();
+  await locators.practiceFormLink.click();
+
+  for (const element of Object.values(locators)) {
+    if (
+      element === locators.practiceFormsLink ||
+      element === locators.practiceFormLink
+    )
+      continue;
+    await expect(element).toBeAttached();
+  }
+  // fill
+  await locators.firstNameInput.fill("Mary");
+  await locators.lastNameInput.fill("Kuleshova");
+  await locators.userEmailInput.fill("mary@test.com");
+  await locators.userNumberInput.fill("1234567890");
+
+  // radio
+  await locators.genderRadioFemale.click();
+
+  // scroll до checkbox
+  await locators.hobbiesCheckboxReading.scrollIntoViewIfNeeded();
+
+  // checkbox
+  await locators.hobbiesCheckboxReading.click();
+  await locators.hobbiesCheckboxMusic.click();
+
+  // subjects
+  await locators.subjectsInput.fill("Math");
+  await locators.subjectsInput.press("Enter");
+
+  // state
+  await locators.stateDropdownWrapper.click({ force: true });
+  await locators.stateDropdownInput.fill("NCR");
+  await locators.stateDropdownInput.press("Enter");
+
+  // city
+  await locators.cityDropdownWrapper.click({ force: true });
+  await locators.cityDropdownInput.fill("Delhi");
+  await locators.cityDropdownInput.press("Enter");
+
+  // address
+  await locators.currentAddressTextarea.fill("Kyiv street 10");
+
+  // submit
+  await locators.submitButton.click();
+});

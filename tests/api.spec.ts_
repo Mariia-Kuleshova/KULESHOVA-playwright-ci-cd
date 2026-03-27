@@ -1,0 +1,126 @@
+import { test, expect } from "@playwright/test";
+test.setTimeout(60000);
+
+// GET запит — отримання поста
+test("Отримання поста через GET", async ({ request }) => {
+  const response = await request.get(
+    "https://jsonplaceholder.typicode.com/posts/1",
+  );
+
+  // перевірка успішності
+  expect(response).toBeOK();
+
+  // отримання JSON
+  const body = await response.json();
+
+  // перевірка даних
+  expect(body).toMatchObject({
+    id: 1,
+    userId: 1,
+  });
+
+  // перевірка що title існує
+  expect(typeof body.title).toBe("string");
+});
+
+// POST запит — створення поста
+test("Створення нового поста через POST", async ({ request }) => {
+  const response = await request.post(
+    "https://jsonplaceholder.typicode.com/posts",
+    {
+      data: {
+        title: "Мій тестовий пост",
+        body: "Це зміст мого запиту",
+        userId: 1,
+      },
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    },
+  );
+
+  // перевірка статусу
+  expect(response.status()).toBe(201);
+
+  const body = await response.json();
+
+  // перевірка полів
+  expect(body.title).toBe("Мій тестовий пост");
+
+  // перевірка що створився id
+  expect(body).toHaveProperty("id");
+});
+
+//завдання 1  GET список постів
+test("Отримання списку постів", async ({ request }) => {
+  const response = await request.get(
+    "https://jsonplaceholder.typicode.com/posts",
+  );
+
+  expect(response).toBeOK();
+
+  const body = await response.json();
+
+  // перевірка що це масив
+  expect(Array.isArray(body)).toBeTruthy();
+
+  // перевірка що масив не пустий
+  expect(body.length).toBeGreaterThan(0);
+});
+
+// завдання 2 — POST створення ресурсу
+test("POST створення ресурсу з перевіркою полів", async ({ request }) => {
+  const response = await request.post(
+    "https://jsonplaceholder.typicode.com/posts",
+    {
+      data: {
+        title: "QA тест",
+        body: "Перевірка API",
+        userId: 10,
+      },
+    },
+  );
+
+  // перевірка статусу
+  expect(response.status()).toBe(201);
+
+  const body = await response.json();
+
+  // часткова перевірка
+  expect(body).toMatchObject({
+    title: "QA тест",
+    body: "Перевірка API",
+  });
+
+  // перевірка що сервер створив id
+  expect(body).toHaveProperty("id");
+});
+
+//завдання 3 негативний тест
+test("GET неіснуючого ресурсу", async ({ request }) => {
+  const response = await request.get(
+    "https://jsonplaceholder.typicode.com/posts/9999",
+  );
+
+  // перевірка 404
+  expect(response.status()).toBe(404);
+
+  // перевірка що запит не успішний
+  expect(response.ok()).toBeFalsy();
+});
+
+//завдання 4 — DELETE + ідемпотентність
+test("DELETE ресурсу", async ({ request }) => {
+  const response = await request.delete(
+    "https://jsonplaceholder.typicode.com/posts/1",
+  );
+
+  // перевірка статусу
+  expect(response.status()).toBe(200);
+
+  // отримання відповіді
+  const body = await response.json();
+
+  // перевірка що відповідь пуста
+  expect(body).toEqual({});
+});
